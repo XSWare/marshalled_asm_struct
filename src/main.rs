@@ -2,7 +2,7 @@ use std::str::from_utf8_unchecked;
 
 #[link(name = "add")]
 extern "C" {
-    fn asm_add(a: u64, b: u64) -> u64;
+    fn asm_add(a: i64, b: i64) -> i64;
 }
 
 #[no_mangle]
@@ -12,5 +12,5 @@ pub extern "C" fn rust_print(msg_ptr: *const u8, len: usize, val: i64) {
 }
 
 fn main() {
-    unsafe { asm_add(1, 2) };
+    unsafe { asm_add(1, -2) };
 }
