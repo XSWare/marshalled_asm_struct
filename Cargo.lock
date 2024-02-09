@@ -3,7 +3,7 @@
 version = 3
 
 [[package]]
-name = "call_nasm_with_rust"
+name = "asm_struct"
 version = "0.1.0"
 dependencies = [
  "nasm-rs",
