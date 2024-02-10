@@ -1,12 +1,8 @@
 section .text
 global new
 new:
-    mov QWORD [rdi], 3
-    mov rsi, say_hello
-    mov [rdi + 8], rsi
-    mov rsi, message_new
-    mov rdx, len_new
-    call print
+    mov rax, 3
+    mov rdx, say_hello
     ret
 
 align 8

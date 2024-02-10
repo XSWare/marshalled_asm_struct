@@ -1,8 +1,6 @@
-use std::mem::MaybeUninit;
-
 #[link(name = "struct")]
 extern "C" {
-    fn new(val_ptr: *mut AsmStruct);
+    fn new() -> AsmStruct;
 }
 
 fn main() {
@@ -18,13 +16,8 @@ struct AsmStruct {
 }
 
 impl AsmStruct {
-    pub fn new() -> Self {
-        let mut asm_struct_uninit: MaybeUninit<AsmStruct> = MaybeUninit::uninit();
-
-        unsafe {
-            new(asm_struct_uninit.as_mut_ptr());
-            asm_struct_uninit.assume_init()
-        }
+    pub extern "C" fn new() -> Self {
+        unsafe { new() }
     }
 
     pub fn say_hello(&self) {
