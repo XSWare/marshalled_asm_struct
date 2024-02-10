@@ -2,37 +2,32 @@ use std::mem::MaybeUninit;
 
 #[link(name = "struct")]
 extern "C" {
-    fn new(val_ptr: *mut i64) -> extern "C" fn();
+    fn new(val_ptr: *mut AsmStruct);
 }
 
 fn main() {
     let asm_struct = AsmStruct::new();
-    asm_struct.say_hello();
     println!("value is {}", asm_struct.val);
+    asm_struct.say_hello();
 }
 
 #[repr(C)]
 struct AsmStruct {
     val: i64,
-    function_ptr: MaybeUninit<extern "C" fn()>,
+    function_ptr: extern "C" fn(),
 }
 
 impl AsmStruct {
     pub fn new() -> Self {
-        let mut asm_struct = Self {
-            function_ptr: MaybeUninit::uninit(),
-            val: 0,
-        };
+        let mut asm_struct_uninit: MaybeUninit<AsmStruct> = MaybeUninit::uninit();
 
         unsafe {
-            asm_struct.function_ptr.write(new(&mut asm_struct.val as *mut i64));
+            new(asm_struct_uninit.as_mut_ptr());
+            asm_struct_uninit.assume_init()
         }
-        asm_struct
     }
 
     pub fn say_hello(&self) {
-        unsafe {
-            (self.function_ptr.assume_init())();
-        }
+        (self.function_ptr)();
     }
 }
