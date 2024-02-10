@@ -1,8 +1,10 @@
 section .text
 global new
 new:
-    mov rax, 3
-    mov rdx, say_hello
+    mov rax, say_hello
+    mov QWORD [rdi], 3
+    mov QWORD [rdi + 8], 42
+    mov QWORD [rdi + 16], rax
     ret
 
 align 8

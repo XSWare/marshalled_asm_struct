@@ -5,13 +5,15 @@ extern "C" {
 
 fn main() {
     let asm_struct = AsmStruct::new();
-    println!("value is {}", asm_struct.val);
+    println!("value 1 is {}", asm_struct.val1);
+    println!("value 2 is {}", asm_struct.val2);
     asm_struct.say_hello();
 }
 
 #[repr(C)]
 struct AsmStruct {
-    val: i64,
+    val1: i64,
+    val2: i64,
     function_ptr: extern "C" fn(),
 }
 
