@@ -1,28 +1,61 @@
-#[link(name = "struct")]
+use std::{
+    io::{Read, Write},
+    slice,
+    str::from_utf8_unchecked,
+    time::Instant,
+};
+
+#[link(name = "utils")]
 extern "C" {
-    fn new() -> AsmStruct;
+    fn count_character_asm(s: *const u8, len: usize, symbol: u8) -> RawArray;
 }
 
-fn main() {
-    let asm_struct = AsmStruct::new();
-    println!("value 1 is {}", asm_struct.val1);
-    println!("value 2 is {}", asm_struct.val2);
-    asm_struct.say_hello();
+/// return a raw pointer to allocated memory of the requested size.
+/// caller is responsible for freeing it.
+#[no_mangle]
+pub extern "C" fn rust_malloc(len: usize) -> *const u64 {
+    let arr = vec![0_u64; len].into_boxed_slice();
+    let ptr = Box::leak(arr);
+    ptr.as_ptr()
 }
 
 #[repr(C)]
-struct AsmStruct {
-    val1: i64,
-    val2: i64,
-    function_ptr: extern "C" fn(),
+struct RawArray {
+    ptr: *mut u64,
+    len: usize,
 }
 
-impl AsmStruct {
-    pub extern "C" fn new() -> Self {
-        unsafe { new() }
-    }
+fn main() {
+    let request = "GET / HTTP/1.0\r\n\r\n";
+    let mut conn = std::net::TcpStream::connect("google.com:80").unwrap();
+    conn.write_all(request.as_bytes()).unwrap();
 
-    pub fn say_hello(&self) {
-        (self.function_ptr)();
+    let mut buffer = Vec::new();
+    conn.read_to_end(&mut buffer).unwrap();
+
+    let html = unsafe { from_utf8_unchecked(&buffer) };
+    let search_char = 'a';
+
+    let start = Instant::now();
+    let result = count_character(html, search_char);
+    let end = Instant::now();
+
+    println!(
+        "found {} occurrences of '{}' in string\n'{}'\nat these offsets:\n{:?}\nsearch duration: {}ns",
+        result.len(),
+        search_char,
+        html,
+        result,
+        (end - start).as_nanos(),
+    );
+}
+
+fn count_character(s: &str, symbol: char) -> Box<[u64]> {
+    unsafe {
+        let res = count_character_asm(s.as_ptr(), s.len(), symbol as u8);
+
+        // wrap the raw array inside of a box to free the previously leaked memory after it is dropped.
+        let slice = slice::from_raw_parts_mut(res.ptr, res.len);
+        Box::from_raw(slice)
     }
 }

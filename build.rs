@@ -1,3 +1,3 @@
 fn main() {
-    nasm_rs::compile_library_args("libstruct.a", &["asm/struct.asm"], &[]).unwrap();
+    nasm_rs::compile_library_args("libutils.a", &["asm/utils.asm"], &[]).unwrap();
 }
